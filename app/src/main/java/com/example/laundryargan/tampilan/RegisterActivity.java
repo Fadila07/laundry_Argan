@@ -3,7 +3,9 @@ package com.example.laundryargan.tampilan;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,11 +13,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.laundryargan.R;
+import com.example.laundryargan.app.AppController;
+import com.example.laundryargan.util.Server;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,119 +29,145 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
-    private static final String TAG = "RegisterActivity";
-    private static final String URL_FOR_REGISTRATION = "https://192.168.10.251/proyek/register.php";
-    ProgressDialog progressDialog;
+    ProgressDialog pDialog;
+    Button btn_register, btn_login;
+    EditText txt_iduser, txt_nama, txt_username, txt_password;
 
-    private EditText signupInputNama, signupInputUsername, signupInputPassword;
-    private Button btnSignUp;
-    private Button btnLinkLogin;
+    int success;
+    ConnectivityManager conMgr;
+
+    private String url = Server.URL  +"register1.php";
+    private static final String TAG = RegisterActivity.class.getSimpleName();
+    private static final String TAG_SUCCESS = "success";
+    private static final String TAG_MESSAGE = "message";
+
+    String tag_json_obj = "json_obj_req";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(false);
 
-        signupInputNama = (EditText) findViewById(R.id.signup_input_nama);
-        signupInputUsername = (EditText) findViewById(R.id.signup_input_username);
-        signupInputPassword = (EditText) findViewById(R.id.signup_input_password);
-        btnSignUp = (Button) findViewById(R.id.btn_signup);
-        btnLinkLogin = (Button) findViewById(R.id.btn_link_login);
+        conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        {
+            if(conMgr.getActiveNetworkInfo() != null && conMgr.getActiveNetworkInfo().isAvailable()
+                && conMgr.getActiveNetworkInfo().isConnected()){
 
-        btnSignUp.setOnClickListener(new View.OnClickListener() {
+            } else{
+                Toast.makeText(getApplicationContext(), "No Internet Connection", Toast.LENGTH_LONG).show();
+            }
+        }
+        btn_login = (Button) findViewById(R.id.btn_link_login);
+        btn_register = (Button) findViewById(R.id.btn_signup);
+        txt_iduser = (EditText) findViewById(R.id.signup_input_id);
+        txt_nama = (EditText) findViewById(R.id.signup_input_nama);
+        txt_username = (EditText) findViewById(R.id.signup_input_username);
+        txt_password = (EditText) findViewById(R.id.signup_input_password);
+
+        btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                submitForm();
+                Intent intent = new Intent(RegisterActivity.this, Login.class);
+                finish();
+                startActivity(intent);
             }
         });
-
-        btnLinkLogin.setOnClickListener(new View.OnClickListener() {
+        btn_register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String iduser = txt_iduser.getText().toString();
+                String nama = txt_nama.getText().toString();
+                String username = txt_username.getText().toString();
+                String password = txt_password.getText().toString();
 
-                Intent i = new Intent(getApplicationContext(),Login.class);
-                startActivity(i);
+                if(conMgr.getActiveNetworkInfo() != null && conMgr.getActiveNetworkInfo().isAvailable()
+                        && conMgr.getActiveNetworkInfo().isConnected()){
+                    checkRegister(iduser, nama, username, password);
+                    
+                } else{
+                    Toast.makeText(getApplicationContext(), "No Internet Connection", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
-    private void submitForm() {
 
-        registerUser(signupInputNama.getText().toString(),
-                signupInputUsername.getText().toString(),
-                signupInputPassword.getText().toString());
-    }
-    private void registerUser(final String nama,  final String username, final String password) {
-        // Tag used to cancel the request
-        String cancel_req_tag = "register";
-
-        progressDialog.setMessage("Adding you ...");
-        showDialog();
-
-        StringRequest strReq = new StringRequest(Request.Method.POST,
-                URL_FOR_REGISTRATION, new Response.Listener<String>() {
-
+    private void checkRegister(final String iduser, final String nama, final String username, final String password) {
+        pDialog = new ProgressDialog(this);
+        pDialog.setCancelable(false);
+        pDialog.setMessage("Register ...");
+//        showDialog();
+        hideDialog();
+        
+        StringRequest strReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Register Response: " + response.toString());
-                hideDialog();
+                Log.e(TAG, "Register Response: " + response.toString());
+//                hideDialog();
+                showDialog();
 
                 try {
                     JSONObject jObj = new JSONObject(response);
-                    boolean error = jObj.getBoolean("error");
+                    success = jObj.getInt(TAG_SUCCESS);
 
-                    if (!error) {
-                        String user = jObj.getJSONObject("user").getString("name");
-                        Toast.makeText(getApplicationContext(), "Hi " + user + ", You are successfully Added!", Toast.LENGTH_SHORT).show();
-
-                        // Launch login activity
-                        Intent intent = new Intent(
-                                RegisterActivity.this,
-                                Login.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-
-                        String errorMsg = jObj.getString("error_msg");
+                    // Check for error node in json
+                    if (success == 1) {
+                        Log.e("Successfully Register!", jObj.toString());
                         Toast.makeText(getApplicationContext(),
-                                errorMsg, Toast.LENGTH_LONG).show();
+                                jObj.getString(TAG_MESSAGE), Toast.LENGTH_LONG).show();
+
+                        txt_iduser.setText("");
+                        txt_nama.setText("");
+                        txt_username.setText("");
+                        txt_password.setText("");
+                        Intent intent = new Intent(RegisterActivity.this, Login.class);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(getApplicationContext(),
+                                jObj.getString(TAG_MESSAGE), Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }
-        },new Response.ErrorListener() {
-
+        }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Registration Error: " + error.getMessage());
+                Log.e(TAG, "Register Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
+
                 hideDialog();
             }
         }) {
             @Override
-            protected Map<String, String> getParams() {
-                // Posting params to register url
+            protected Map<String, String> getParams(){
+                // Posting parameters to login url
                 Map<String, String> params = new HashMap<String, String>();
+                params.put("iduser", iduser);
+                params.put("nama", nama);
                 params.put("username", username);
                 params.put("password", password);
-                params.put("nama", nama);
+
                 return params;
             }
         };
         // Adding request to request queue
-        AppSingleton.getInstance(getApplicationContext()).addToRequestQueue(strReq, cancel_req_tag);
-    }
-
-    private void showDialog() {
-        if (!progressDialog.isShowing())
-            progressDialog.show();
+        AppController.getInstance().addToRequestQueue(strReq, tag_json_obj);
     }
 
     private void hideDialog() {
-        if (progressDialog.isShowing())
-            progressDialog.dismiss();
+        if (pDialog.isShowing())
+            pDialog.show();
+    }
+
+    private void showDialog() {
+        if (!pDialog.isShowing())
+            pDialog.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(RegisterActivity.this, Login.class);
+        finish();
+        startActivity(intent);
     }
 }

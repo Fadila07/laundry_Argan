@@ -10,12 +10,27 @@
     tools:context=".tampilan.RegisterActivity">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="411dp"
+        android:layout_height="414dp"
         android:layout_gravity="center"
         android:orientation="vertical"
         android:paddingLeft="20dp"
         android:paddingRight="20dp">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/signup_input_layout_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp">
+
+            <EditText
+                android:id="@+id/signup_input_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="ID" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/signup_input_layout_username"
@@ -29,7 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:hint="Username"/>
+                android:hint="Username" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -38,13 +53,14 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp">
+
             <EditText
                 android:id="@+id/signup_input_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:inputType="textPassword"
-                android:hint="@string/hint_password" />
+                android:hint="@string/hint_password"
+                android:inputType="textPassword" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -54,29 +70,33 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp">
+
             <EditText
                 android:id="@+id/signup_input_nama"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:hint="Nama"/>
+                android:hint="Nama" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <Button android:id="@+id/btn_signup"
+        <Button
+            android:id="@+id/btn_signup"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_sign_up"
-            android:background="@color/colorPrimary"
             android:layout_marginTop="40dp"
-            android:textColor="@android:color/white"/>
-        <Button android:id="@+id/btn_link_login"
+            android:background="@color/colorPrimary"
+            android:text="@string/btn_sign_up"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/btn_link_login"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_link_login"
-            android:background="@null"
             android:layout_marginTop="3dp"
-            android:textColor="@android:color/black"/>
+            android:background="@null"
+            android:text="@string/btn_link_login"
+            android:textColor="@android:color/black" />
     </LinearLayout>
 
 </LinearLayout>
